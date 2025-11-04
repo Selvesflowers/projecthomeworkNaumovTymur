@@ -1,0 +1,57 @@
+ .perfume-card {
+
+border-radius: 10px; 
+overflow: hidden; 
+font-family: sans-serif;
+
+} 
+
+.pefume-card img { 
+width: 200px;
+}
+
+.perfume-card h3 {
+    margin: 10px 0 5px;
+    font-size: 18px;
+font-weight: bold;
+}
+
+.perfume-card p {
+margin-top: 5px;
+padding-left: 30px;
+    
+font-size: 16px;
+}
+
+img{
+    width: 100px;
+}
+
+.perfume-row{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 150px;
+
+}
+
+.nasomatto-logo{
+     position: absolute;
+    top: 20px;
+left: 50%;
+transform: translateX(-50%);
+z-index: 100;
+}
+
+body{
+    position: relative;
+    margin: 0;
+    padding-top: 150px;
+
+}
+
+.nasomatto-logo img{
+    width: 194px;
+    height: auto;
+}
+
+
