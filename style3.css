@@ -1,68 +1,16 @@
- .perfume-card {
-
-border-radius: 10px; 
-overflow: hidden; 
+.text3{
+max-width: 800px;
+margin: 30px auto;
 font-family: sans-serif;
-
-} 
-
-.perfume-card img { 
-width: 100%;
-object-fit: cover;
-display: block;
-height: 250px;
+font-size: 14px;
+line-height: 1.6;
+text-align: justify;
+padding: 0 20px;
 }
 
-.perfume-card h3 {
-    margin: 10px 0 5px;
-    font-size: 18px;
-font-weight: bold;
-}
-
-.perfume-card p {
-margin-top: 5px;
-/* padding-left: 30px; */
-text-align: center;
-    
-font-size: 16px;
-}
-
-
-
-.perfume-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 150px;
-justify-content: center;
-}
-
-.nasomatto-logo { 
-     position: absolute;
-    top: 20px;
-left: 50%;
-transform: translateX(-50%);
-z-index: 100;
-}
-
-body {
-    position: relative;
-    margin: 0;
-    padding-top: 150px;
-
-}
-
-.nasomatto-logo img {
-    width: 190px;
+.foto1{
+   width: 500px;
     height: auto;
-}
-
-img:hover {
-    filter: none;
-}
-
-a{
-    color: black;
-    text-decoration: none;
 }
 
 .menu{
@@ -73,6 +21,12 @@ a{
     font-family: sans-serif;
     
 }
+
+a{
+    color: black;
+    text-decoration: none;
+}
+
 
 
 
@@ -124,10 +78,3 @@ a{
   transform: scaleX(1.4) scaleY(1.6);
   opacity: 0;
 }
-
-
-
-
-
-
-
