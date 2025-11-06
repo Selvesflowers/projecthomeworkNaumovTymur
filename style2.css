@@ -52,7 +52,7 @@ body {
 }
 
 .nasomatto-logo img {
-    width: 190px;
+    width: 185px;
     height: auto;
 }
 
@@ -129,5 +129,9 @@ a{
 
 
 
-
+@media (max-width: 768px) {
+  .nasomatto-logo {
+   margin-left: 20px;
+  }
+}
 

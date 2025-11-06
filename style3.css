@@ -78,3 +78,11 @@ a{
   transform: scaleX(1.4) scaleY(1.6);
   opacity: 0;
 }
+
+
+
+@media (max-width: 768px) {
+  .text3 {
+    margin-top: 100px;
+  }
+}
