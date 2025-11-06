@@ -7,10 +7,11 @@ font-family: sans-serif;
 } 
 
 .perfume-card img { 
-width: 100%;
+max-width: 180px;
 object-fit: cover;
 display: block;
-height: 250px;
+height: 180px;
+margin: 0 auto;
 }
 
 .perfume-card h3 {
