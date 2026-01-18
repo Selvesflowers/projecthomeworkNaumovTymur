@@ -22,28 +22,31 @@
 
 
     <span class="seredina">
-    <form class="form">
-       <p class="form-title">Sign in to your account</p>
-        <div class="input-container">
-          <input type="email" placeholder="Enter email" required>
-          <span>
-          </span>
-      </div>
-      <div class="input-container">
-          <input type="password" placeholder="Enter password" required>
-        </div>
-         <button type="submit" class="submit">
-        Sign in
-      </button>
+    <form class="form" id="loginForm" novalidate>
+  <p class="form-title">Sign in to your account</p>
 
-      <p class="signup-link">
-        No account?
-        <a href="">Sign up</a>
-      </p>
-   </form>
+  <div class="input-container">
+    <input id="email" name="email" type="email" placeholder="Enter email" required>
+    <small class="error" data-for="email"></small>
+  </div>
+
+  <div class="input-container">
+    <input id="password" name="password" type="password" placeholder="Enter password" required>
+    <small class="error" data-for="password"></small>
+  </div>
+
+  <button type="submit" class="submit">
+    Sign in
+  </button>
+
+  <p class="signup-link">
+    No account?
+    <a href="">Sign up</a>
+  </p>
+</form>
 </span>
 
 </div>
-
+<script src="script.js" defer></script>
 </body>
 </html>
