@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="cart.css">
+</head>
+<body>
+  <a class="back" href="cart.html">BACK</a>
+  <a class="account-link" href="register.html">ACCOUNT</a>
+
+  <main class="cart-page">
+    <h1>Checkout</h1>
+    <p id="checkoutStatus" class="status"></p>
+
+    <form id="checkoutForm" class="checkout-form">
+      <input id="customerName" name="customer_name" type="text" placeholder="Full name" required>
+      <input id="customerEmail" name="customer_email" type="email" placeholder="Email" required>
+      <input id="customerPhone" name="customer_phone" type="text" placeholder="Phone">
+      <textarea id="deliveryAddress" name="delivery_address" placeholder="Delivery address" required></textarea>
+      <textarea id="orderComment" name="comment" placeholder="Comment"></textarea>
+      <button type="submit">Place order</button>
+    </form>
+  </main>
+
+  <script src="script.js" defer></script>
+</body>
+</html>

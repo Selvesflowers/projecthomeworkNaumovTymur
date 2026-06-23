@@ -23,10 +23,16 @@
 
     <span class="seredina">
     <form class="form" id="loginForm" novalidate>
-  <p class="form-title">Sign in to your account</p>
+  <p class="form-title">Account</p>
+  <p class="auth-status" id="authStatus"></p>
 
   <div class="input-container">
-    <input id="email" name="email" type="email" placeholder="Enter email" required>
+    <input id="username" name="username" type="text" placeholder="Enter username" required>
+    <small class="error" data-for="username"></small>
+  </div>
+
+  <div class="input-container">
+    <input id="email" name="email" type="email" placeholder="Enter email for registration">
     <small class="error" data-for="email"></small>
   </div>
 
@@ -35,14 +41,18 @@
     <small class="error" data-for="password"></small>
   </div>
 
-  <button type="submit" class="submit">
+  <button type="submit" class="submit" id="loginSubmit">
     Sign in
   </button>
 
-  <p class="signup-link">
-    No account?
-    <a href="">Sign up</a>
-  </p>
+  <button type="button" class="submit secondary" id="registerSubmit">
+    Create account
+  </button>
+
+  <button type="button" class="submit danger" id="logoutSubmit">
+    Logout
+  </button>
+
 </form>
 </span>
 

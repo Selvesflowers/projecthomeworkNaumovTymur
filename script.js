@@ -21,6 +21,57 @@ if (toggleThemeBtn) {
 }
 
 // =========================
+// API CLIENT (Django backend)
+// =========================
+const API_BASE = localStorage.getItem("apiBaseUrl") || "http://127.0.0.1:8000/api";
+const TOKEN_KEY = "authToken";
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function setToken(token) {
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+  }
+}
+
+async function apiRequest(path, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  const token = getToken();
+  if (token) headers.Authorization = `Token ${token}`;
+
+  const response = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
+
+  if (response.status === 204) return null;
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const message =
+      data.detail ||
+      data.non_field_errors?.join(" ") ||
+      data.password_confirm?.join(" ") ||
+      data.username?.join(" ") ||
+      data.password?.join(" ") ||
+      "API request failed.";
+    throw new Error(message);
+  }
+  return data;
+}
+
+function money(value) {
+  return `$${Number(value || 0).toFixed(2)}`;
+}
+
+// =========================
 // MODAL (index.html only)
 // =========================
 const modal = document.querySelector("#modal");
@@ -233,10 +284,31 @@ if (productRoot) {
             <option>2 ks</option>
             <option>3 ks</option>
           </select>
-          <button class="add">Add to cart</button>
+          <button class="add" data-slug="${p.id}">Add to cart</button>
+          <div class="product-message" id="productMessage"></div>
         </div>
       </div>
     `;
+
+    const addButton = productRoot.querySelector(".add");
+    const productMessage = productRoot.querySelector("#productMessage");
+    addButton.addEventListener("click", async () => {
+      if (!getToken()) {
+        window.location.href = "register.html";
+        return;
+      }
+      const qty = Number(productRoot.querySelector(".qty").value.split(" ")[0]);
+      productMessage.textContent = "Adding...";
+      try {
+        await apiRequest("/cart/items/", {
+          method: "POST",
+          body: JSON.stringify({ product_slug: p.id, quantity: qty }),
+        });
+        productMessage.textContent = "Added to cart.";
+      } catch (error) {
+        productMessage.textContent = error.message;
+      }
+    });
   }
 }
 
@@ -244,8 +316,12 @@ if (productRoot) {
 // REGISTER (register.html)
 // =========================
 const form = document.querySelector("#loginForm");
+const usernameInput = document.querySelector("#username");
 const emailInput = document.querySelector("#email");
 const passInput = document.querySelector("#password");
+const authStatus = document.querySelector("#authStatus");
+const registerSubmit = document.querySelector("#registerSubmit");
+const logoutSubmit = document.querySelector("#logoutSubmit");
 
 function setError(fieldId, message) {
   const small = document.querySelector(`.error[data-for="${fieldId}"]`);
@@ -254,9 +330,16 @@ function setError(fieldId, message) {
   if (input) input.classList.toggle("input-error", !!message);
 }
 
+function validateUsername(v) {
+  v = (v || "").trim();
+  if (!v) return "Username is required";
+  if (v.length < 3) return "Username must be at least 3 characters";
+  return "";
+}
+
 function validateEmail(v) {
   v = (v || "").trim();
-  if (!v) return "Email is required";
+  if (!v) return "";
   const ok = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v);
   if (!ok) return "Enter a valid email (example@mail.com)";
   return "";
@@ -269,25 +352,196 @@ function validatePassword(v) {
   return "";
 }
 
+async function refreshAuthStatus() {
+  if (!authStatus) return;
+  if (!getToken()) {
+    authStatus.textContent = "You are not signed in.";
+    return;
+  }
+  try {
+    const user = await apiRequest("/auth/me/");
+    authStatus.textContent = `Signed in as ${user.username}.`;
+  } catch (error) {
+    setToken("");
+    authStatus.textContent = "Session expired. Sign in again.";
+  }
+}
+
+async function submitLogin() {
+  const usernameMsg = validateUsername(usernameInput.value);
+  const passMsg = validatePassword(passInput.value);
+
+  setError("username", usernameMsg);
+  setError("password", passMsg);
+
+  if (usernameMsg || passMsg) return;
+
+  authStatus.textContent = "Signing in...";
+  const data = await apiRequest("/auth/login/", {
+    method: "POST",
+    body: JSON.stringify({
+      username: usernameInput.value.trim(),
+      password: passInput.value,
+    }),
+  });
+  setToken(data.token);
+  await refreshAuthStatus();
+}
+
+async function submitRegister() {
+  const usernameMsg = validateUsername(usernameInput.value);
+  const emailMsg = validateEmail(emailInput.value);
+  const passMsg = validatePassword(passInput.value);
+
+  setError("username", usernameMsg);
+  setError("email", emailMsg);
+  setError("password", passMsg);
+
+  if (usernameMsg || emailMsg || passMsg) return;
+
+  authStatus.textContent = "Creating account...";
+  const data = await apiRequest("/auth/register/", {
+    method: "POST",
+    body: JSON.stringify({
+      username: usernameInput.value.trim(),
+      email: emailInput.value.trim(),
+      password: passInput.value,
+      password_confirm: passInput.value,
+    }),
+  });
+  setToken(data.token);
+  await refreshAuthStatus();
+}
+
 if (emailInput) emailInput.addEventListener("input", () => setError("email", ""));
 if (passInput) passInput.addEventListener("input", () => setError("password", ""));
+if (usernameInput) usernameInput.addEventListener("input", () => setError("username", ""));
 
-if (form && emailInput && passInput) {
-  form.addEventListener("submit", (e) => {
+if (form && usernameInput && passInput) {
+  refreshAuthStatus();
+
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    try {
+      await submitLogin();
+    } catch (error) {
+      authStatus.textContent = error.message;
+    }
+  });
 
-    const emailMsg = validateEmail(emailInput.value);
-    const passMsg = validatePassword(passInput.value);
+  registerSubmit.addEventListener("click", async () => {
+    try {
+      await submitRegister();
+    } catch (error) {
+      authStatus.textContent = error.message;
+    }
+  });
 
-    setError("email", emailMsg);
-    setError("password", passMsg);
+  logoutSubmit.addEventListener("click", async () => {
+    try {
+      if (getToken()) await apiRequest("/auth/logout/", { method: "POST" });
+    } catch (error) {
+      console.warn(error);
+    } finally {
+      setToken("");
+      await refreshAuthStatus();
+    }
+  });
+}
 
-    if (!emailMsg && !passMsg) {
-      alert("Signed in (demo).");
-      emailInput.value = "";
-      passInput.value = "";
-      setError("email", "");
-      setError("password", "");
+// =========================
+// CART (cart.html)
+// =========================
+const cartItemsRoot = document.querySelector("#cartItems");
+const cartTotal = document.querySelector("#cartTotal");
+const cartStatus = document.querySelector("#cartStatus");
+
+async function loadCart() {
+  if (!cartItemsRoot) return;
+  if (!getToken()) {
+    cartStatus.textContent = "Sign in to view your cart.";
+    cartItemsRoot.innerHTML = "";
+    return;
+  }
+
+  try {
+    cartStatus.textContent = "Loading cart...";
+    const cart = await apiRequest("/cart/");
+    cartStatus.textContent = cart.items.length ? "" : "Cart is empty.";
+    cartTotal.textContent = money(cart.total);
+    cartItemsRoot.innerHTML = cart.items
+      .map(
+        (item) => `
+          <div class="cart-item">
+            <img src="${item.product.image}" alt="${item.product.name}">
+            <div>
+              <h3>${item.product.name}</h3>
+              <p>${money(item.product.price)} / ${item.product.volume_ml} ml</p>
+            </div>
+            <div class="cart-actions">
+              <input type="number" min="1" value="${item.quantity}" data-id="${item.id}">
+              <button type="button" data-remove="${item.id}">Remove</button>
+            </div>
+          </div>
+        `
+      )
+      .join("");
+  } catch (error) {
+    cartStatus.textContent = error.message;
+  }
+}
+
+if (cartItemsRoot) {
+  loadCart();
+
+  cartItemsRoot.addEventListener("change", async (e) => {
+    if (!e.target.matches("input[data-id]")) return;
+    await apiRequest(`/cart/items/${e.target.dataset.id}/`, {
+      method: "PATCH",
+      body: JSON.stringify({ quantity: Number(e.target.value) }),
+    });
+    await loadCart();
+  });
+
+  cartItemsRoot.addEventListener("click", async (e) => {
+    if (!e.target.matches("button[data-remove]")) return;
+    await apiRequest(`/cart/items/${e.target.dataset.remove}/`, {
+      method: "DELETE",
+    });
+    await loadCart();
+  });
+}
+
+// =========================
+// CHECKOUT (checkout.html)
+// =========================
+const checkoutForm = document.querySelector("#checkoutForm");
+const checkoutStatus = document.querySelector("#checkoutStatus");
+
+if (checkoutForm) {
+  checkoutForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!getToken()) {
+      window.location.href = "register.html";
+      return;
+    }
+
+    checkoutStatus.textContent = "Creating order...";
+    try {
+      const order = await apiRequest("/checkout/", {
+        method: "POST",
+        body: JSON.stringify({
+          customer_name: document.querySelector("#customerName").value,
+          customer_email: document.querySelector("#customerEmail").value,
+          customer_phone: document.querySelector("#customerPhone").value,
+          delivery_address: document.querySelector("#deliveryAddress").value,
+          comment: document.querySelector("#orderComment").value,
+        }),
+      });
+      checkoutForm.reset();
+      checkoutStatus.textContent = `Order #${order.id} created. Total: ${money(order.total)}.`;
+    } catch (error) {
+      checkoutStatus.textContent = error.message;
     }
   });
 }
