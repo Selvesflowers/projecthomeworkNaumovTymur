@@ -23,7 +23,10 @@ if (toggleThemeBtn) {
 // =========================
 // API CLIENT (Django backend)
 // =========================
-const API_BASE = localStorage.getItem("apiBaseUrl") || "http://127.0.0.1:8000/api";
+const API_HOST = ["localhost", "127.0.0.1", ""].includes(window.location.hostname)
+  ? "127.0.0.1"
+  : window.location.hostname;
+const API_BASE = localStorage.getItem("apiBaseUrl") || `http://${API_HOST}:8000/api`;
 const TOKEN_KEY = "authToken";
 
 function getToken() {
