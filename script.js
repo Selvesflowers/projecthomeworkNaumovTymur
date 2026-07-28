@@ -46,10 +46,15 @@ async function apiRequest(path, options = {}) {
   const token = getToken();
   if (token) headers.Authorization = `Token ${token}`;
 
-  const response = await fetch(`${API_BASE}${path}`, {
-    ...options,
-    headers,
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      headers,
+    });
+  } catch (error) {
+    throw new Error("Backend is not running or browser blocked the API request.");
+  }
 
   if (response.status === 204) return null;
 
